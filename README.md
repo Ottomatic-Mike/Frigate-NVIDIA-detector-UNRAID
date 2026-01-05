@@ -55,49 +55,68 @@ Save yourself the two days. Here's what actually works.
 
 ---
 
-## Step 1: Create the Frigate Container
+## Step 1: Create the Frigate Container in Unraid
+
+1. Go to **Docker** tab in Unraid
+2. Click **Add Container**
+3. Toggle **Basic View** to **OFF** (so you see advanced options)
 
 ### Container Settings
 
-| Setting | Value |
-|---------|-------|
+| Field | Value |
+|-------|-------|
+| **Name** | `FrigateNVR` |
 | **Repository** | `ghcr.io/blakeblackshear/frigate:stable-tensorrt` |
-| **Network Type** | Bridge (or Host) |
+| **Network Type** | `bridge` |
 | **Extra Parameters** | `--runtime=nvidia --shm-size=256m` |
 
 ### Environment Variables
 
-| Variable | Value |
-|----------|-------|
-| `NVIDIA_VISIBLE_DEVICES` | `all` |
-| `NVIDIA_DRIVER_CAPABILITIES` | `compute,utility,video` |
-| `TZ` | Your timezone (e.g., `America/New_York`) |
+Click **"Add another Path, Port, Variable, Label or Device"** and select **Variable** for each:
+
+| Config Type | Name | Key | Value |
+|-------------|------|-----|-------|
+| Variable | NVIDIA Devices | `NVIDIA_VISIBLE_DEVICES` | `all` |
+| Variable | NVIDIA Capabilities | `NVIDIA_DRIVER_CAPABILITIES` | `compute,utility,video` |
+| Variable | Timezone | `TZ` | Your timezone (e.g., `America/New_York`) |
 
 ### Port Mappings
 
-| Container Port | Host Port | Protocol | Description |
-|----------------|-----------|----------|-------------|
-| 5000 | 5000 | TCP | Web UI (unauthenticated) |
-| 8971 | 8971 | TCP | Web UI (authenticated) |
-| 8554 | 8554 | TCP | RTSP feeds |
-| 8555 | 8555 | TCP | WebRTC over TCP |
-| 8555 | 8555 | **UDP** | WebRTC over UDP |
-| 1984 | 1984 | TCP | go2rtc API |
+Click **"Add another Path, Port, Variable, Label or Device"** and select **Port** for each:
 
-> **Important:** Port 8555 must be mapped for both TCP and UDP for WebRTC to function properly.
+| Config Type | Name | Container Port | Host Port | Connection Type |
+|-------------|------|----------------|-----------|-----------------|
+| Port | Web UI | `5000` | `5000` | TCP |
+| Port | Web UI Auth | `8971` | `8971` | TCP |
+| Port | RTSP | `8554` | `8554` | TCP |
+| Port | WebRTC TCP | `8555` | `8555` | TCP |
+| Port | WebRTC UDP | `8555` | `8555` | **UDP** |
+| Port | go2rtc API | `1984` | `1984` | TCP |
+
+> **Important:** Port 8555 must be added twice - once for TCP and once for UDP. WebRTC requires both protocols.
 
 ### Volume Mappings
 
-| Container Path | Host Path | Description |
-|----------------|-----------|-------------|
-| `/config` | `/mnt/user/appdata/frigate` | Configuration |
-| `/media/frigate` | `/mnt/user/data/frigate` | Recordings storage |
+Click **"Add another Path, Port, Variable, Label or Device"** and select **Path** for each:
 
-### Device Mappings (Optional, for hardware decoding)
+| Config Type | Name | Container Path | Host Path | Access Mode |
+|-------------|------|----------------|-----------|-------------|
+| Path | Config | `/config` | `/mnt/user/appdata/frigate` | Read/Write |
+| Path | Media | `/media/frigate` | `/mnt/user/data/frigate` | Read/Write |
 
-| Device | Description |
-|--------|-------------|
-| `/dev/dri` | GPU render devices |
+> Create the media directory if it doesn't exist: `mkdir -p /mnt/user/data/frigate`
+
+### Device Mappings
+
+**For NVIDIA GPUs, you do NOT need to add any device mappings.** The `--runtime=nvidia` flag with the environment variables handles GPU passthrough automatically.
+
+Do NOT add:
+- ❌ `/dev/dri` (this is for Intel/AMD GPUs)
+- ❌ `/dev/nvidia0` or similar (handled by runtime)
+
+### Click Apply
+
+Do not start the container yet - we need to create the model and config file first.
 
 ---
 
