@@ -33,7 +33,7 @@ Save yourself the two days. Here's what actually works.
 
 | Component | Details |
 |-----------|---------|
-| Unraid Version | 7.2 |
+| Unraid Version | 7.2.x |
 | Frigate Version | 0.16.3 |
 | GPU | NVIDIA RTX 5060 Ti (Blackwell) |
 | CPU | AMD Ryzen 9 7950X |
