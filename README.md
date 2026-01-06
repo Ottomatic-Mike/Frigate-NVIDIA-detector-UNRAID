@@ -2,7 +2,7 @@
 
 ## The Story
 
-This guide exists because I mass two days mass nothing worked.
+This guide exists because I spent two days and nothing worked... right up until it did. 
 
 I wanted a simple thing: GPU-accelerated object detection in Frigate on my Unraid server with an NVIDIA RTX 5060 Ti. Should be straightforward, right? The Frigate docs mention ONNX support for NVIDIA GPUs. Just configure a detector and go.
 
